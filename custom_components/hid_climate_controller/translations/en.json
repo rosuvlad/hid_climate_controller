@@ -1,0 +1,34 @@
+{
+    "config": {
+        "abort": {
+            "CLIMATE_ENTITY_SELECTION_STEP_NO_AVAILABLE_ENTITIES_ERROR": "CLIMATE_ENTITY_SELECTION_STEP_NO_AVAILABLE_ENTITIES_ERROR",
+            "already_configured": "HID Climate Controller is already configured"
+        },
+        "error": {
+            "CLIMATE_ENTITY_SELECTION_STEP_NO_AVAILABLE_ENTITIES_ERROR": "CLIMATE_ENTITY_SELECTION_STEP_NO_AVAILABLE_ENTITIES_ERROR",
+            "CLIMATE_ENTITY_SELECTION_STEP_UNKNOWN_FAILURE_ERROR": "CLIMATE_ENTITY_SELECTION_STEP_UNKNOWN_FAILURE_ERROR",
+            "CLIMATE_ENTITY_SELECTION_STEP_VALIDATION_FAILURE_ERROR": "CLIMATE_ENTITY_SELECTION_STEP_VALIDATION_FAILURE_ERROR",
+            "DEVICE_VALIDATION_UNIQUE_ID_INVALID_ERROR": "DEVICE_VALIDATION_UNIQUE_ID_INVALID_ERROR",
+            "MQTT_DISCOVERY_STEP_DEVICE_VALIDATION_FAILURE_ERROR": "MQTT_DISCOVERY_STEP_DEVICE_VALIDATION_FAILURE_ERROR",
+            "MQTT_DISCOVERY_STEP_UNKNOWN_FAILURE_ERROR": "MQTT_DISCOVERY_STEP_UNKNOWN_FAILURE_ERROR",
+            "USER_INPUT_STEP_DEVICE_VALIDATION_FAILURE_ERROR": "USER_INPUT_STEP_DEVICE_VALIDATION_FAILURE_ERROR",
+            "USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR": "USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR"
+        },
+        "step": {
+            "climate_entity_selection": {
+                "data": {
+                    "entity_id": "Choose a climate entity"
+                },
+                "description": "Pair your HID Climate Controller ({unique_id}) to one of your climate entities.",
+                "title": "{unique_id}"
+            },
+            "user": {
+                "data": {
+                    "unique_id": "Unique Name"
+                },
+                "description": "Please provide the controller unique name. The one shown while in configuration mode (broadcasted WiFi SSID name).",
+                "title": "Configuring HID Climate Controller"
+            }
+        }
+    }
+}
