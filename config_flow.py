@@ -5,12 +5,13 @@ import json
 import voluptuous as vol
 
 from typing import Any
+from json.decoder import JSONDecodeError
 from voluptuous.error import Error
+
 from homeassistant import config_entries
 from homeassistant.helpers import config_validation as cv, selector
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 from homeassistant.data_entry_flow import FlowResult, AbortFlow
-from json.decoder import JSONDecodeError
 
 from .const import (
     DOMAIN,
@@ -20,12 +21,12 @@ from .const import (
     DEVICE_NAME_KEY,
     DEVICE_DEFERRED_REGISTRATION_KEY,
     CONTROLLER_KEY,
-    CONTROLLER_ENTITY_ID,
-    CONTROLLER_NAME,
+    CONTROLLER_ENTITY_ID_KEY,
+    CONTROLLER_NAME_KEY,
     CLIMATE_KEY,
-    CLIMATE_ENTITY_ID,
+    CLIMATE_ENTITY_ID_KEY,
     CLIMATE_ENTITY_TYPE,
-    BASE_ERROR,
+    BASE_ERROR_PLACEHOLDER,
     DEVICE_ALREADY_CONFIGURED_ERROR,
     MQTT_DISCOVERY_STEP_INVALID_DISCOVERY_PAYLOAD_ERROR,
     MQTT_DISCOVERY_STEP_DEVICE_VALIDATION_FAILURE_ERROR,
@@ -51,11 +52,11 @@ DISCOVERY_CONFIG_SCHEMA = vol.Schema(
 def generate_user_config_schema(data: dict[str, Any]) -> vol.Schema:
     return vol.Schema(
         {
-            CONTROLLER_ENTITY_ID: vol.Required(
+            CONTROLLER_ENTITY_ID_KEY: vol.Required(
                 str, default=data.get(DEVICE_UNIQUE_ID_KEY)
             ),
-            CONTROLLER_NAME: vol.Optional(str, default=data.get(DEVICE_NAME_KEY)),
-            vol.Required(CLIMATE_ENTITY_ID): selector.EntitySelector(
+            CONTROLLER_NAME_KEY: vol.Optional(str, default=data.get(DEVICE_NAME_KEY)),
+            vol.Required(CLIMATE_ENTITY_ID_KEY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=CLIMATE_ENTITY_TYPE),
             ),
         }
@@ -128,20 +129,20 @@ class HidClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                unique_id = user_input.get(CONTROLLER_ENTITY_ID)
+                unique_id = user_input.get(CONTROLLER_ENTITY_ID_KEY)
 
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
 
                 controller_config = {
                     ENTITY_ID_KEY: unique_id,
-                    FRIENDLY_NAME_KEY: user_input.get(CONTROLLER_NAME) or unique_id,
+                    FRIENDLY_NAME_KEY: user_input.get(CONTROLLER_NAME_KEY) or unique_id,
                     DEVICE_DEFERRED_REGISTRATION_KEY: self._discovery_config.get(
                         DEVICE_DEFERRED_REGISTRATION_KEY, True
                     ),
                 }
 
-                climate_entity_id = user_input.get(CLIMATE_ENTITY_ID)
+                climate_entity_id = user_input.get(CLIMATE_ENTITY_ID_KEY)
                 climate_states = self.hass.states.get(climate_entity_id)
                 climate_friendly_name = climate_states.attributes.get(
                     FRIENDLY_NAME_KEY, climate_entity_id
@@ -167,11 +168,11 @@ class HidClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except AbortFlow as ex:
                 return self.async_abort(
                     reason=DEVICE_ALREADY_CONFIGURED_ERROR,
-                    description_placeholders={CONTROLLER_ENTITY_ID: unique_id},
+                    description_placeholders={CONTROLLER_ENTITY_ID_KEY: unique_id},
                 )
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.error("Unknown exception encoutered", ex)
-                errors[BASE_ERROR] = USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR
+                errors[BASE_ERROR_PLACEHOLDER] = USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR
 
         config_schema = generate_user_config_schema(self._discovery_config)
 
