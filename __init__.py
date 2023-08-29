@@ -14,8 +14,6 @@ _logger = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
-    _logger.info("Initializing %s integration", DOMAIN)
-
     await HIDClimateControllerIntegration.get_instance().init(hass)
 
     return True

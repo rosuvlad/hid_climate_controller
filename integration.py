@@ -9,6 +9,7 @@ from voluptuous.error import Error
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.loader import async_get_integration
 from homeassistant.components import mqtt
 
@@ -62,20 +63,13 @@ class HIDClimateControllerIntegration:
         self._initialized = True
 
     async def async_setup_entry(self, entry: ConfigEntry) -> bool:
-        _LOGGER.info(
-            "Registering config entry: %s with data: %s", entry.unique_id, entry.data
-        )
-
         await self.async_register_device_or_defer(entry)
 
         return True
 
     async def async_unload_entry(self, entry: ConfigEntry) -> bool:
-        _LOGGER.info(
-            "Removing config entry: %s with data: %s", entry.unique_id, entry.data
-        )
-
         unique_id = entry.data.get(CONTROLLER_KEY, {}).get(ENTITY_ID_KEY)
+
         await self._async_stop_deferred_device_registration_if_pending(unique_id)
 
         return True
