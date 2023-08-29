@@ -1,12 +1,21 @@
-"""Constants for the HID Climate Controller integration."""
+import re
 
 DOMAIN = "hid_climate_controller"
 
+DEVICE_UNIQUE_ID_REGEX = re.compile(r"^HW-THID-[A-Za-z0-9]{17}$", re.IGNORECASE)
+DEVICE_SW_VERSION_REGEX = re.compile(r"^\d+\.\d+\.\d+$")
+
 ENTITY_ID_KEY = "entity_id"
 FRIENDLY_NAME_KEY = "friendly_name"
+
 DEVICE_UNIQUE_ID_KEY = "unique_id"
 DEVICE_NAME_KEY = "name"
+DEVICE_KEY = "device"
+DEVICE_MODEL_KEY = "model"
+DEVICE_MANUFACTURER_KEY = "manufacturer"
+DEVICE_SW_VERSION_KEY = "sw_version"
 DEVICE_DEFERRED_REGISTRATION_KEY = "deferred_registration"
+
 CONTROLLER_KEY = "controller"
 CONTROLLER_ENTITY_ID_KEY = "controller_entity_id"
 CONTROLLER_NAME_KEY = "controller_name"
@@ -15,8 +24,13 @@ CLIMATE_KEY = "climate"
 CLIMATE_ENTITY_ID_KEY = "climate_entity_id"
 
 # Errors
+UNKNOWN_EXCEPTION_ERROR = "Unknown exception encountered. Check logs for details."
+
 BASE_ERROR_PLACEHOLDER = "base"
+REQUIRED_INPUT_ERROR = "Required"
+INVALID_UNIQUE_ID_FORMAT_ERROR = "INVALID_UNIQUE_ID_FORMAT"
 MULTIPLE_VALIDATION_ERRORS = "MULTIPLE_VALIDATION_ERRORS"
+
 DEVICE_ALREADY_CONFIGURED_ERROR = "already_configured"
 DEVICE_VALIDATION_UNIQUE_ID_INVALID_ERROR = "DEVICE_VALIDATION_UNIQUE_ID_INVALID_ERROR"
 MQTT_DISCOVERY_STEP_INVALID_DISCOVERY_PAYLOAD_ERROR = (

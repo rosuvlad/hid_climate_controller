@@ -1,26 +1,21 @@
 {
     "config": {
-        "abort": {
-            "already_configured": "Your HID Climate Controller ({unique_id}) has already been set up."
-        },
-        "error": {
-            "DEVICE_VALIDATION_UNIQUE_ID_INVALID_ERROR": "The identified Unique ID is not in the correct format. Please make sure it follows the required structure (e.g., 'TC-HID-<17 alphanumerical characters>').",
-            "MQTT_DISCOVERY_STEP_INVALID_DISCOVERY_PAYLOAD_ERROR": "There was an issue setting up the device using the provided information. Please ensure the details are correct and try again. If the problem persists, consider reaching out to support or checking the device's user guide.",
-            "MQTT_DISCOVERY_STEP_DEVICE_VALIDATION_FAILURE_ERROR": "We couldn't set up the device using the given details. Please double-check that the device is correctly configured and online, then try again. If you continue to face issues, consider referring to the device's manual or contacting support.",
-            "MQTT_DISCOVERY_STEP_UNKNOWN_FAILURE_ERROR": "Sorry, something went wrong while trying to set up your device. Please ensure everything is connected and try again. If the issue persists, consider reaching out to customer support for assistance.",
-            "USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR": "Oops! Something went wrong while processing your input. Please check the details you've entered and try again. If the problem continues, consider reaching out to customer support for help.",
-            "CLIMATE_ENTITY_SELECTION_STEP_UNKNOWN_FAILURE_ERROR": "Oops! We encountered an issue while trying to select your climate device. Please ensure your device is online and accessible, then try again. If you keep facing this issue, consider reaching out to customer support or checking your device's user guide."
-        },
         "step": {
             "user": {
                 "data": {
-                    "controller_entity_id": "HID Controller Unique ID",
-                    "controller_name": "HID Controller Name",
-                    "climate_entity_id": "Climate Entity"
+                    "controller_entity_id": "Controller Unique ID (SSID name while in configuration mode).",
+                    "controller_name": "Controller Name",
+                    "climate_entity_id": "Associated Climate Device"
                 },
-                "description": "Enter the unique name of the controller. This is the name displayed when it's in configuration mode, often seen as the broadcasted WiFi network name.",
-                "title": "Setting Up Your HID Climate Controller"
+                "description": "Please provide details about your HID Climate Controller to ensure smooth integration with your Home Assistant system.",
+                "title": "Set up your HID Climate Controller"
             }
+        },
+        "abort": {
+            "already_configured": "This HID Climate Controller has already been set up. If you wish to modify its settings, please navigate to the device's configuration page."
+        },
+        "error": {
+            "USER_INPUT_STEP_UNKNOWN_FAILURE_ERROR": "Oops! An unexpected error occurred while processing your input. Please double-check your details and try again."
         }
     }
 }
