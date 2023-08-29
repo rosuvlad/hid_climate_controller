@@ -18,6 +18,7 @@ from .const import (
     DOMAIN,
     ENTITY_ID_KEY,
     FRIENDLY_NAME_KEY,
+    DEVICE_KEY,
     DEVICE_UNIQUE_ID_KEY,
     DEVICE_NAME_KEY,
     DEVICE_DEFERRED_REGISTRATION_KEY,
@@ -59,7 +60,7 @@ def generate_config_schema(data: dict[str, Any]) -> vol.Schema:
 
 
 @config_entries.HANDLERS.register(DOMAIN)
-class HidClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class HIDClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _discovery_config = None
 
     async def async_step_mqtt(
@@ -80,10 +81,12 @@ class HidClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(unique_id)
             self._abort_if_unique_id_configured()
 
+            device_config = discovery_config.get(DEVICE_KEY, {})
+
             self._discovery_config = {
-                **discovery_config,
                 DEVICE_UNIQUE_ID_KEY: unique_id,
                 DEVICE_NAME_KEY: discovery_config.get(DEVICE_NAME_KEY),
+                DEVICE_KEY: device_config,
                 DEVICE_DEFERRED_REGISTRATION_KEY: False,
             }
 
@@ -132,10 +135,13 @@ class HidClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(unique_id)
                     self._abort_if_unique_id_configured()
 
+                    device_config = self._discovery_config.get(DEVICE_KEY, {})
+
                     controller_config = {
                         ENTITY_ID_KEY: unique_id,
                         FRIENDLY_NAME_KEY: user_input.get(CONTROLLER_NAME_KEY)
                         or unique_id,
+                        DEVICE_KEY: device_config,
                         DEVICE_DEFERRED_REGISTRATION_KEY: self._discovery_config.get(
                             DEVICE_DEFERRED_REGISTRATION_KEY, True
                         ),

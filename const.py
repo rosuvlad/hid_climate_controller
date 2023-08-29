@@ -4,6 +4,7 @@ DOMAIN = "hid_climate_controller"
 
 DEVICE_UNIQUE_ID_REGEX = re.compile(r"^HW-THID-[A-Za-z0-9]{17}$", re.IGNORECASE)
 DEVICE_SW_VERSION_REGEX = re.compile(r"^\d+\.\d+\.\d+$")
+DEVICE_HW_VERSION_REGEX = re.compile(r"^\d+\.\d+\.\d+$")
 
 ENTITY_ID_KEY = "entity_id"
 FRIENDLY_NAME_KEY = "friendly_name"
@@ -14,6 +15,7 @@ DEVICE_KEY = "device"
 DEVICE_MODEL_KEY = "model"
 DEVICE_MANUFACTURER_KEY = "manufacturer"
 DEVICE_SW_VERSION_KEY = "sw_version"
+DEVICE_HW_VERSION_KEY = "hw_version"
 DEVICE_DEFERRED_REGISTRATION_KEY = "deferred_registration"
 
 CONTROLLER_KEY = "controller"

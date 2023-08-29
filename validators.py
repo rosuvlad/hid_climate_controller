@@ -8,12 +8,14 @@ from .const import (
     REQUIRED_INPUT_ERROR,
     DEVICE_UNIQUE_ID_REGEX,
     DEVICE_SW_VERSION_REGEX,
+    DEVICE_HW_VERSION_REGEX,
     DEVICE_UNIQUE_ID_KEY,
     DEVICE_NAME_KEY,
     DEVICE_KEY,
     DEVICE_MODEL_KEY,
     DEVICE_MANUFACTURER_KEY,
     DEVICE_SW_VERSION_KEY,
+    DEVICE_HW_VERSION_KEY,
     CONTROLLER_ENTITY_ID_KEY,
     CONTROLLER_NAME_KEY,
     CLIMATE_ENTITY_ID_KEY,
@@ -30,6 +32,9 @@ DISCOVERY_INFO_SCHEMA = vol.Schema(
             vol.Optional(DEVICE_MANUFACTURER_KEY, default=""): cv.string,
             vol.Optional(DEVICE_SW_VERSION_KEY, default=""): vol.All(
                 cv.string, vol.Match(DEVICE_SW_VERSION_REGEX)
+            ),
+            vol.Optional(DEVICE_HW_VERSION_KEY, default=""): vol.All(
+                cv.string, vol.Match(DEVICE_HW_VERSION_REGEX)
             ),
         },
     },
