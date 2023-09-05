@@ -14,6 +14,8 @@ from homeassistant.components import mqtt
 
 from .validators import validate_discovery_info
 from .concurrent_dict import ConcurrentDict
+from .climate_service import ClimateService
+from .climate_commands import ClimateCommands
 from .climate_bridge import ClimateBridge
 from .const import (
     DOMAIN,
@@ -41,11 +43,12 @@ class HIDClimateControllerIntegration:
     _hass = None
     _device_discovery_topic = None
     _pending_device_registrations = ConcurrentDict()
+    _climate_service = None
+    _climate_commands = None
     _climate_bridges = ConcurrentDict()
 
     @staticmethod
     def get_instance():
-        """Singleton pattern: Returns the existing instance or creates a new one."""
         if HIDClimateControllerIntegration._instance is None:
             HIDClimateControllerIntegration()
         return HIDClimateControllerIntegration._instance
@@ -57,18 +60,16 @@ class HIDClimateControllerIntegration:
         return cls._instance
 
     async def init(self, hass: HomeAssistant) -> None:
-        """Initializes the integration."""
         if self._initialized:
             return
 
-        _LOGGER.info("Initializing HID Climate Controller Integration")
         self._hass = hass
+        self._climate_service = ClimateService(self._hass)
+        self._climate_commands = ClimateCommands(self._climate_service)
         self._hass.data.setdefault(DOMAIN, self)
         self._initialized = True
 
     async def async_setup_entry(self, entry: ConfigEntry) -> bool:
-        """Set up or defer the device registration."""
-        _LOGGER.debug("Setting up entry for HID Climate Controller")
         await self.async_register_device_or_defer(entry)
 
         return True
@@ -89,7 +90,7 @@ class HIDClimateControllerIntegration:
 
         await self._async_stop_deferred_device_registration_if_pending(unique_id)
 
-        climate_bridge = self._climate_bridges.pop(climate_entity_id)
+        climate_bridge = self._climate_bridges.get(climate_entity_id)
         if not climate_bridge:
             return
 
@@ -130,8 +131,11 @@ class HIDClimateControllerIntegration:
             hw_version=device_data.get(DEVICE_HW_VERSION_KEY),
         )
 
-        climate_bridge = self._climate_bridges.setdefault(
-            climate_entity_id, ClimateBridge(self._hass, mqtt, climate_config)
+        climate_bridge = self._climate_bridges.setdefault_with_func_construct(
+            climate_entity_id,
+            lambda: ClimateBridge(
+                self._hass, mqtt, self._climate_commands, climate_config
+            ),
         )
 
         await climate_bridge.register_controller(controller_config)

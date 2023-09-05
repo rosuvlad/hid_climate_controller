@@ -10,6 +10,10 @@ class ConcurrentDict:
         with self._lock:
             return iter(self._dict.keys())
 
+    def __len__(self):
+        with self._lock:
+            return len(self._data)
+
     def set(self, key, value):
         with self._lock:
             self._dict[key] = value
@@ -25,6 +29,14 @@ class ConcurrentDict:
             else:
                 self._dict[key] = default
                 return default
+
+    def setdefault_with_func_construct(self, key, func=None):
+        with self._lock:
+            if key in self._dict:
+                return self._dict[key]
+            else:
+                self._dict[key] = func() if func is not None else None
+                return self._dict[key]
 
     def pop(self, key, default=None):
         with self._lock:

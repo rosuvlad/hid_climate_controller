@@ -1,21 +1,34 @@
 from typing import Any
-from enum import Enum
 
+from homeassistant.core import HomeAssistant, Context, State, ServiceResponse
 
-class ClimateServices(Enum):
-    TURN_ON = "climate.turn_on"
-    TURN_OFF = "climate.turn_off"
-    SET_TEMPERATURE = "climate.set_temperature"
-    SET_SWING_MODE = "climate.set_swing_mode"
-    SET_PRESET_MODE = "climate.set_preset_mode"
-    SET_HVAC_MODE = "climate.set_hvac_mode"
-    SET_HUMIDITY = "climate.set_humidity"
-    SET_FAN_MODE = "climate.set_fan_mode"
-    SET_AUX_HEAT = "climate.set_aux_heat"
+from .utilities import Utilities
 
 
 class ClimateService:
-    async def call_service(
-        service: ClimateServices, initiator: str, data: dict[str, Any]
-    ) -> None:
-        pass
+    _DOMAIN = "climate"
+
+    _hass = None
+
+    def __init__(self, hass: HomeAssistant) -> None:
+        self._hass = hass
+
+    def get_state(self, entity_id) -> State | None:
+        return self._hass.states.get(entity_id)
+
+    async def call(
+        self,
+        service: str,
+        target_entity_id: str,
+        service_data: dict[str, Any],
+        triggering_entity_id: str = None,
+    ) -> ServiceResponse:
+        parent_id = Utilities.encode_string_as_ulid(triggering_entity_id)
+        context = Context(parent_id=parent_id)
+        return await self._hass.services.async_call(
+            domain=self._DOMAIN,
+            service=service,
+            target={"entity_id": target_entity_id},
+            service_data=service_data,
+            context=context,
+        )
