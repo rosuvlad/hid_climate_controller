@@ -7,7 +7,6 @@ from typing import Any
 from voluptuous.error import Error
 
 from homeassistant.core import HomeAssistant
-from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.loader import async_get_integration
@@ -46,6 +45,7 @@ class HIDClimateControllerIntegration:
 
     @staticmethod
     def get_instance():
+        """Singleton pattern: Returns the existing instance or creates a new one."""
         if HIDClimateControllerIntegration._instance is None:
             HIDClimateControllerIntegration()
         return HIDClimateControllerIntegration._instance
@@ -57,17 +57,18 @@ class HIDClimateControllerIntegration:
         return cls._instance
 
     async def init(self, hass: HomeAssistant) -> None:
+        """Initializes the integration."""
         if self._initialized:
             return
 
+        _LOGGER.info("Initializing HID Climate Controller Integration")
         self._hass = hass
         self._hass.data.setdefault(DOMAIN, self)
-        self._hass.bus.async_listen(
-            EVENT_STATE_CHANGED, self._async_handle_state_changed
-        )
         self._initialized = True
 
     async def async_setup_entry(self, entry: ConfigEntry) -> bool:
+        """Set up or defer the device registration."""
+        _LOGGER.debug("Setting up entry for HID Climate Controller")
         await self.async_register_device_or_defer(entry)
 
         return True
@@ -221,15 +222,6 @@ class HIDClimateControllerIntegration:
         except Exception as ex:  # pylint: disable=broad-except
             await self._async_stop_deferred_device_registration_if_pending(unique_id)
             raise ex
-
-    async def _async_handle_state_changed(self, event):
-        entity_id = event.data.get("entity_id")
-        if not entity_id:
-            return
-
-        for climate_bridge in self._climate_bridges.values():
-            if climate_bridge.can_handle(entity_id):
-                await climate_bridge.state_changed(entity_id, event)
 
     def _get_second_last_segment(
         self, input_str: str, delimiter: str = "/", default: str = None

@@ -19,3 +19,18 @@ Payload:
   }
 }
 ```
+
+
+```
+parent_id = UlidUtilities.encode_string_as_ulid("test")
+_LOGGER.info("Encoded parent_id: %s", parent_id)
+context = Context(parent_id=parent_id)
+
+await self._hass.services.async_call(
+    domain="climate",
+    service="turn_on",
+    target={"entity_id": self._entity_id},
+    service_data={},
+    context=context,
+)
+```
