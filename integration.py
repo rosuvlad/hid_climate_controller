@@ -7,12 +7,14 @@ from typing import Any
 from voluptuous.error import Error
 
 from homeassistant.core import HomeAssistant
+from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.loader import async_get_integration
 from homeassistant.components import mqtt
 
 from .validators import validate_discovery_info
+from .concurrent_dict import ConcurrentDict
 from .climate_bridge import ClimateBridge
 from .const import (
     DOMAIN,
@@ -39,8 +41,8 @@ class HIDClimateControllerIntegration:
     _initialized = False
     _hass = None
     _device_discovery_topic = None
-    _pending_device_registrations: dict[str, Any] = {}
-    _climate_bridges: dict[str, ClimateBridge] = {}
+    _pending_device_registrations = ConcurrentDict()
+    _climate_bridges = ConcurrentDict()
 
     @staticmethod
     def get_instance():
@@ -60,6 +62,9 @@ class HIDClimateControllerIntegration:
 
         self._hass = hass
         self._hass.data.setdefault(DOMAIN, self)
+        self._hass.bus.async_listen(
+            EVENT_STATE_CHANGED, self._async_handle_state_changed
+        )
         self._initialized = True
 
     async def async_setup_entry(self, entry: ConfigEntry) -> bool:
@@ -216,6 +221,15 @@ class HIDClimateControllerIntegration:
         except Exception as ex:  # pylint: disable=broad-except
             await self._async_stop_deferred_device_registration_if_pending(unique_id)
             raise ex
+
+    async def _async_handle_state_changed(self, event):
+        entity_id = event.data.get("entity_id")
+        if not entity_id:
+            return
+
+        for climate_bridge in self._climate_bridges.values():
+            if climate_bridge.can_handle(entity_id):
+                await climate_bridge.state_changed(entity_id, event)
 
     def _get_second_last_segment(
         self, input_str: str, delimiter: str = "/", default: str = None
