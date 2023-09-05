@@ -138,7 +138,7 @@ class HIDClimateControllerIntegration:
             ),
         )
 
-        await climate_bridge.register_controller(controller_config)
+        return await climate_bridge.register_controller(controller_config)
 
     async def _async_start_deferred_device_registration(
         self, entry: ConfigEntry

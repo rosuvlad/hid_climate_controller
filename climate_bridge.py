@@ -5,7 +5,7 @@ import asyncio
 
 from typing import Any
 
-from homeassistant.core import HomeAssistant, Context, Event, ServiceResponse
+from homeassistant.core import HomeAssistant, Context, Event
 from homeassistant.const import EVENT_STATE_CHANGED
 
 from .concurrent_dict import ConcurrentDict
@@ -53,7 +53,7 @@ class ClimateBridge:
             EVENT_STATE_CHANGED, self._async_handle_state_changed
         )
 
-    async def register_controller(self, config: dict[str, Any]) -> None:
+    async def register_controller(self, config: dict[str, Any]) -> DeviceController:
         entity_id = config.get(ENTITY_ID_KEY)
         if not entity_id:
             _LOGGER.debug(
@@ -61,8 +61,11 @@ class ClimateBridge:
             )
             return
 
+        def build_controller() -> DeviceController:
+            return DeviceController(self._hass, self._mqtt, config)
+
         device_controller = self._controllers.setdefault_with_func_construct(
-            entity_id, lambda: DeviceController(self._hass, self._mqtt, config)
+            entity_id, build_controller
         )
         _LOGGER.debug("Registered device controller: %s", entity_id)
         _LOGGER.debug(
@@ -77,6 +80,8 @@ class ClimateBridge:
                 self._previous_event,
             )
             await device_controller.state_changed(self._previous_event)
+
+        return device_controller
 
     async def unregister_controller(self, config: dict[str, Any]) -> None:
         entity_id = config.get(ENTITY_ID_KEY)
