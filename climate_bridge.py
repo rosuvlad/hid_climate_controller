@@ -23,6 +23,7 @@ class ClimateBridge:
     _entity_id = None
     _previous_event = None
     _climate_commands = None
+    _climate_destroy_callback = None
     _controllers = None
     _unsubscribe = None
 
@@ -31,6 +32,7 @@ class ClimateBridge:
         hass: HomeAssistant,
         mqtt: Any,
         climate_commands: ClimateCommands,
+        climate_destroy_callback: function,
         config: dict[str, Any],
     ) -> None:
         self._hass = hass
@@ -39,6 +41,7 @@ class ClimateBridge:
         self._entity_id = self._config.get(ENTITY_ID_KEY)
 
         self._climate_commands = climate_commands
+        self._climate_destroy_callback = climate_destroy_callback
         self._controllers = ConcurrentDict()
 
         state = self._climate_commands.get_state(self._entity_id)
@@ -102,17 +105,22 @@ class ClimateBridge:
             _LOGGER.debug("Destroying device controller: %s", entity_id)
             await device_controller.destroy()
 
+        await self._request_removal_if_childless()
+
     async def destroy(self) -> None:
         _LOGGER.debug("Destroying climate bridge %s", self._entity_id)
-        _LOGGER.debug("Unregistering all device controllers and destroying them")
-        for key in self._controllers.keys():
-            controller = self._controllers.pop(key)
-            if controller:
-                await controller.destroy()
 
         _LOGGER.debug("Unsubscribing from state changed events")
         if self._unsubscribe:
             self._unsubscribe()
+
+        keys = self._controllers.keys()
+        if len(keys) == 0:
+            _LOGGER.debug("Unregistering all device controllers and destroying them")
+            for key in keys:
+                controller = self._controllers.pop(key)
+                if controller:
+                    await controller.destroy()
 
     def _should_handle(self, entity_id) -> Any:
         return self._entity_id == entity_id
@@ -146,3 +154,7 @@ class ClimateBridge:
         await asyncio.gather(*tasks)
 
         self._previous_event = current_event
+
+    async def _request_removal_if_childless(self) -> None:
+        if self._climate_destroy_callback and len(self._controllers) == 0:
+            await self._climate_destroy_callback(self._entity_id)

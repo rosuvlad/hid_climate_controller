@@ -12,7 +12,13 @@ class ConcurrentDict:
 
     def __len__(self):
         with self._lock:
-            return len(self._data)
+            return len(self._dict)
+
+    def __setitem__(self, key, value):
+        self.set(key, value)
+
+    def __getitem__(self, key):
+        return self.get(key)
 
     def set(self, key, value):
         with self._lock:
@@ -46,6 +52,26 @@ class ConcurrentDict:
         with self._lock:
             if key in self._dict:
                 del self._dict[key]
+
+    async def async_try_remove_and_execute_action(
+        self, key, action_func, condition_func=None
+    ):
+        with self._lock:
+            value = self._dict.pop(key, None)
+            if value is None:
+                return
+            should_execute = True
+            if condition_func:
+                try:
+                    should_execute = await condition_func(self._dict, value)
+                except Exception:  # pylint: disable=broad-except
+                    should_execute = False
+                if not should_execute:
+                    return
+            try:
+                await action_func(self._dict, value)
+            except Exception:  # pylint: disable=broad-except
+                return
 
     def keys(self):
         with self._lock:

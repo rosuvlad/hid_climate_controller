@@ -30,6 +30,7 @@ from .const import (
     CLIMATE_ENTITY_TYPE,
     UNKNOWN_EXCEPTION_ERROR,
     BASE_ERROR_PLACEHOLDER,
+    DEVICE_CONFIG_UPDATED,
     DEVICE_ALREADY_CONFIGURED_ERROR,
     MQTT_DISCOVERY_STEP_INVALID_DISCOVERY_PAYLOAD_ERROR,
     MQTT_DISCOVERY_STEP_DEVICE_VALIDATION_FAILURE_ERROR,
@@ -83,19 +84,25 @@ class HIDClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors = validate_discovery_info(discovery_config)
             if len(errors) > 0:
                 raise Error
-
             _LOGGER.debug("Successfully validated MQTT discovery payload")
 
             unique_id = discovery_config[DEVICE_UNIQUE_ID_KEY]
-
             _LOGGER.debug(
                 "Extracted unique_id from MQTT discovery payload: %s", unique_id
             )
 
-            await self.async_set_unique_id(unique_id)
-            self._abort_if_unique_id_configured()
-
-            _LOGGER.debug("Flagged %s unique_id as registration in progress", unique_id)
+            config_entry = await self.async_set_unique_id(unique_id)
+            controller_config = (
+                {} if not config_entry else config_entry.data.get(CONTROLLER_KEY, {})
+            )
+            controller_deferred_registration = controller_config.get(
+                DEVICE_DEFERRED_REGISTRATION_KEY, False
+            )
+            if config_entry and controller_deferred_registration:
+                _LOGGER.debug(
+                    "Device with unique_id %s is already registered with deferred registration is pending. Finishing up the pending registration process",
+                    unique_id,
+                )
 
             device_config = discovery_config.get(DEVICE_KEY, {})
 
@@ -111,7 +118,25 @@ class HIDClimateControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._discovery_config,
             )
 
-            return await self.async_step_user()
+            if not controller_deferred_registration:
+                self._abort_if_unique_id_configured()
+                return await self.async_step_user()
+
+            config = {**config_entry.data}
+            config.update(
+                {
+                    CONTROLLER_KEY: {
+                        ENTITY_ID_KEY: unique_id,
+                        FRIENDLY_NAME_KEY: discovery_config.get(DEVICE_NAME_KEY)
+                        or unique_id,
+                        DEVICE_KEY: device_config,
+                        DEVICE_DEFERRED_REGISTRATION_KEY: False,
+                    }
+                }
+            )
+            self.hass.config_entries.async_update_entry(config_entry, data=config)
+            await self.hass.config_entries.async_reload(config_entry.entry_id)
+            return self.async_abort(reason=DEVICE_CONFIG_UPDATED)
         except JSONDecodeError as ex:
             _LOGGER.error(
                 "MQTT discovery registration failed because of malformed payload. Exception: %s. MQTT Payload: %s",
