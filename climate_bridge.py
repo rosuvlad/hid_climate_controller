@@ -168,10 +168,8 @@ class ClimateBridge:
     def _get_mutated_state_from_event(self, event: Event) -> dict[str, Any]:
         triggering_entity_ulid = str(event.context.parent_id)
 
-        state = None
-        new_state = event.data.get("new_state")
-        if new_state:
-            state = new_state.as_compressed_state()
+        event_state = event.data.get("new_state")
+        state = event_state.as_compressed_state() if event_state else {}
 
         triggering_entity_ulid = state.get("context", {}).get("parent_id")
         state[TRIGGERING_ENTITY_ULID_KEY] = triggering_entity_ulid
