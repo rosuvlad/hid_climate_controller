@@ -27,7 +27,7 @@ def throttle(milliseconds):
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            key = (args, frozenset(kwargs.items()))
+            key = tuple(args) + tuple(kwargs.items())
             current_time = time.time() * 1000  # convert to milliseconds
 
             if key in cache and current_time - cache[key] < milliseconds:
@@ -49,7 +49,7 @@ def async_throttle(ms):
         @functools.wraps(fn)
         async def wrapper(*args, **kwargs):
             now = time.time()
-            key = (args, frozenset(kwargs.items()))
+            key = tuple(args) + tuple(kwargs.items())
 
             if key in last_called and now - last_called[key] < ms / 1000:
                 return

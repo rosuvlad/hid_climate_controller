@@ -2,10 +2,17 @@ import re
 
 DOMAIN = "hid_climate_controller"
 
+STATE_TOPIC = "homeassistant/hid_climate_controller/{unique_id}/state"
+COMMAND_TOPIC = (
+    "homeassistant/hid_climate_controller/{unique_id}/services/{{service_name}}"
+)
+
 DEVICE_UNIQUE_ID_REGEX = re.compile(r"^HW-THID-[A-Za-z0-9]{17}$", re.IGNORECASE)
 DEVICE_SW_VERSION_REGEX = re.compile(r"^\d+\.\d+\.\d+$")
 DEVICE_HW_VERSION_REGEX = re.compile(r"^\d+\.\d+\.\d+$")
 
+TRIGGERING_ENTITY_ULID_KEY = "triggering_entity_ulid"
+TRIGGERING_ENTITY_ID_KEY = "triggering_entity_id"
 ENTITY_ID_KEY = "entity_id"
 FRIENDLY_NAME_KEY = "friendly_name"
 

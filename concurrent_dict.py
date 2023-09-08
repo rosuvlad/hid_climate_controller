@@ -44,6 +44,14 @@ class ConcurrentDict:
                 self._dict[key] = func() if func is not None else None
                 return self._dict[key]
 
+    async def async_setdefault_with_func_construct(self, key, func=None):
+        with self._lock:
+            if key in self._dict:
+                return self._dict[key]
+            else:
+                self._dict[key] = await func() if func is not None else None
+                return self._dict[key]
+
     def pop(self, key, default=None):
         with self._lock:
             return self._dict.pop(key, default)
@@ -52,6 +60,18 @@ class ConcurrentDict:
         with self._lock:
             if key in self._dict:
                 del self._dict[key]
+
+    def keys(self):
+        with self._lock:
+            return list(self._dict.keys())
+
+    def values(self):
+        with self._lock:
+            return list(self._dict.values())
+
+    def items(self):
+        with self._lock:
+            return list(self._dict.items())
 
     async def async_try_remove_and_execute_action(
         self, key, action_func, condition_func=None
@@ -72,11 +92,3 @@ class ConcurrentDict:
                 await action_func(self._dict, value)
             except Exception:  # pylint: disable=broad-except
                 return
-
-    def keys(self):
-        with self._lock:
-            return list(self._dict.keys())
-
-    def values(self):
-        with self._lock:
-            return list(self._dict.values())

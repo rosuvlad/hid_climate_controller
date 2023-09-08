@@ -34,3 +34,15 @@ await self._hass.services.async_call(
     context=context,
 )
 ```
+
+```
+Device sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/config
+Server sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/config/ack
+
+Server sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/state
+Device sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/state/ack
+
+Device sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/services/<service_name>
+Server sends homeassistant/hid_climate_controller/HW-THID-12345678901231111/services/<service_name>/ack
+
+```

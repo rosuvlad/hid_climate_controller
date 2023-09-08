@@ -21,6 +21,19 @@ class ClimateCommands:
     def __init__(self, service: ClimateService) -> None:
         self._service = service
 
+    def get_commands(self) -> list[str]:
+        return [
+            self._SERVICE_TURN_ON,
+            self._SERVICE_TURN_OFF,
+            self._SERVICE_SET_TEMPERATURE,
+            self._SERVICE_SET_SWING_MODE,
+            self._SERVICE_SET_PRESET_MODE,
+            self._SERVICE_SET_HVAC_MODE,
+            self._SERVICE_SET_HUMIDITY,
+            self._SERVICE_SET_FAN_MODE,
+            self._SERVICE_SET_AUX_HEAT,
+        ]
+
     def get_state(self, entity_id) -> State | None:
         return self._service.get_state(entity_id)
 

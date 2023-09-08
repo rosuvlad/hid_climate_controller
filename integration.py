@@ -7,7 +7,6 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
-from homeassistant.components import mqtt
 
 from .concurrent_dict import ConcurrentDict
 from .climate_service import ClimateService
@@ -124,7 +123,6 @@ class HIDClimateControllerIntegration:
             climate_entity_id,
             lambda: ClimateBridge(
                 self._hass,
-                mqtt,
                 self._climate_commands,
                 self._async_climate_bridge_removal_requested,
                 climate_config,
